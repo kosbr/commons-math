@@ -94,6 +94,12 @@ public class SimplexSolver extends LinearOptimizer {
     private SolutionCallback solutionCallback;
 
     /**
+     * The interceptor that has an access to every intermediate solution during processing
+     * the second phase of simplex method. It also can interrupt the process.
+     */
+    private SimplexSolverInterceptor simplexSolverInterceptor;
+
+    /**
      * Builds a simplex solver with default settings.
      */
     public SimplexSolver() {
@@ -131,6 +137,10 @@ public class SimplexSolver extends LinearOptimizer {
         this.maxUlps = maxUlps;
         this.cutOff = cutOff;
         this.pivotSelection = PivotSelectionRule.DANTZIG;
+    }
+
+    public void setSimplexSolverInterceptor(final SimplexSolverInterceptor simplexSolverInterceptor) {
+        this.simplexSolverInterceptor = simplexSolverInterceptor;
     }
 
     /**
@@ -386,14 +396,27 @@ public class SimplexSolver extends LinearOptimizer {
         }
 
         while (!tableau.isOptimal()) {
+            if (simplexSolverInterceptor != null) {
+                final PointValuePair intermediateSolution = tableau.getSolution();
+                checkSolutionValidity(intermediateSolution);
+                boolean interrupt = simplexSolverInterceptor.intercept(intermediateSolution);
+                if (interrupt) {
+                    return intermediateSolution;
+                }
+            }
             doIteration(tableau);
         }
 
+        final PointValuePair solution = tableau.getSolution();
+        checkSolutionValidity(solution);
+        return solution;
+    }
+
+    private void checkSolutionValidity(PointValuePair solution) {
         // check that the solution respects the nonNegative restriction in case
         // the epsilon/cutOff values are too large for the actual linear problem
         // (e.g. with very small constraint coefficients), the solver might actually
         // find a non-valid solution (with negative coefficients).
-        final PointValuePair solution = tableau.getSolution();
         if (isRestrictedToNonNegative()) {
             final double[] coeff = solution.getPoint();
             for (int i = 0; i < coeff.length; i++) {
@@ -402,6 +425,5 @@ public class SimplexSolver extends LinearOptimizer {
                 }
             }
         }
-        return solution;
     }
 }

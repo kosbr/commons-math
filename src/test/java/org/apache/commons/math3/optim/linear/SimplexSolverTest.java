@@ -531,6 +531,59 @@ public class SimplexSolverTest {
     }
 
     @Test
+    public void testInterceptWithoutInterrupting() {
+        LinearObjectiveFunction f = new LinearObjectiveFunction(new double[] { -2, 1 }, -5);
+        Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
+        constraints.add(new LinearConstraint(new double[] { 1, 2 }, Relationship.LEQ, 6));
+        constraints.add(new LinearConstraint(new double[] { 3, 2 }, Relationship.LEQ, 12));
+        constraints.add(new LinearConstraint(new double[] { 0, 1 }, Relationship.GEQ, 0));
+
+        final SimplexSolver solver = new SimplexSolver();
+        final List<PointValuePair> intermediatePoints = new ArrayList<PointValuePair>();
+        solver.setSimplexSolverInterceptor(new SimplexSolverInterceptor() {
+            public boolean intercept(PointValuePair pointValuePair) {
+                intermediatePoints.add(pointValuePair);
+                return false;
+            }
+        });
+        solver.optimize(DEFAULT_MAX_ITER, f, new LinearConstraintSet(constraints),
+                GoalType.MINIMIZE, new NonNegativeConstraint(false));
+
+        Assert.assertEquals(1, intermediatePoints.size());
+        final PointValuePair intermediateSolution = intermediatePoints.get(0);
+        Assert.assertEquals(0.0, intermediateSolution.getPoint()[0], 0.0);
+        Assert.assertEquals(0.0, intermediateSolution.getPoint()[1], 0.0);
+        Assert.assertEquals(-5.0, intermediateSolution.getValue(), 0.0);
+    }
+
+    @Test
+    public void testInterrupt() {
+        LinearObjectiveFunction f = new LinearObjectiveFunction(new double[] { -2, 1 }, -5);
+        Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
+        constraints.add(new LinearConstraint(new double[] { 1, 2 }, Relationship.LEQ, 6));
+        constraints.add(new LinearConstraint(new double[] { 3, 2 }, Relationship.LEQ, 12));
+        constraints.add(new LinearConstraint(new double[] { 0, 1 }, Relationship.GEQ, 0));
+
+        SimplexSolver solver = new SimplexSolver();
+        final List<PointValuePair> intermediatePoints = new ArrayList<PointValuePair>();
+        solver.setSimplexSolverInterceptor(new SimplexSolverInterceptor() {
+            public boolean intercept(PointValuePair pointValuePair) {
+                intermediatePoints.add(pointValuePair);
+                return true;
+            }
+        });
+
+        PointValuePair solution = solver.optimize(DEFAULT_MAX_ITER, f, new LinearConstraintSet(constraints),
+                GoalType.MINIMIZE, new NonNegativeConstraint(false));
+
+        Assert.assertEquals(1, intermediatePoints.size());
+        Assert.assertEquals(solution, intermediatePoints.get(0));
+        Assert.assertEquals(0.0, solution.getPoint()[0], 0.0);
+        Assert.assertEquals(0.0, solution.getPoint()[1], 0.0);
+        Assert.assertEquals(-5.0, solution.getValue(), 0.0);
+    }
+
+    @Test
     public void testSolutionWithNegativeDecisionVariable() {
         LinearObjectiveFunction f = new LinearObjectiveFunction(new double[] { -2, 1 }, 0);
         Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
