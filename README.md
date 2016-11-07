@@ -44,6 +44,9 @@ Apache Commons Math
 ===================
 
 The Apache Commons Math project is a library of lightweight, self-contained mathematics and statistics components addressing the most common practical problems not immediately available in the Java programming language or commons-lang.
+This is the fork of [apache commons-math](https://github.com/apache/commons-math). The version number
+matches with original. For example, version 3.6.1.2 corresponds to 3.6.1 version of the original. 
+The difference is only in simplex method interceptor which is described [here](http://kosbr.github.io/2016/11/07/simplex-interceptor.html)
 
 Documentation
 -------------
@@ -54,20 +57,19 @@ Questions related to the usage of Apache Commons Math should be posted to the [u
 
 Where can I get the latest release?
 -----------------------------------
-You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-math/download_math.cgi).
-
-Alternatively you can pull it from the central Maven repositories:
+You can pull it from the jcenter repository:
 
 ```xml
 <dependency>
-  <groupId>org.apache.commons</groupId>
+  <groupId>com.github.kosbr</groupId>
   <artifactId>commons-math3</artifactId>
-  <version>3.4</version>
+  <version>3.6.1.2</version>
 </dependency>
 ```
 
 Contributing
 ------------
+The text below is about the original [commons-math](https://github.com/apache/commons-math).
 
 We accept PRs via github. The [developer mailing list][ml] is the main channel of communication for contributors.
 There are some guidelines which will make applying PRs easier for us:
