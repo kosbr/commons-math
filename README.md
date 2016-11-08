@@ -63,7 +63,7 @@ You can pull it from the jcenter repository:
 <dependency>
   <groupId>com.github.kosbr</groupId>
   <artifactId>commons-math3</artifactId>
-  <version>3.6.1.2</version>
+  <version>3.6.1.3</version>
 </dependency>
 ```
 
